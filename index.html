@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flipper Berlin</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@900&family=IBM+Plex+Mono:wght@400;500&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --midnight: #0D0B07;
+  --surface: #1C1910;
+  --amber: #F2A020;
+  --amber-dim: #B87A10;
+  --cream: #EBE5D5;
+  --cream-dim: #A89F8C;
+  --teal: #2BBFAA;
+  --gray-border: #2E2B1F;
+  --gray-mid: #504C3E;
+  --gray-light: #6B6858;
+  --font-display: 'Barlow Condensed', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-body: 'Barlow', sans-serif;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background: var(--midnight);
+  color: var(--cream);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NOISE TEXTURE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+  opacity: 0.025;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ── AMBIENT GLOW ── */
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 500px;
+  background: radial-gradient(ellipse at center, rgba(242,160,32,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── MAIN ── */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── LOGO ── */
+.logo {
+  text-align: center;
+  animation: fadeUp 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.mark {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 32%, #FFFFFF 0%, #D8D8D8 28%, #A0A0A0 58%, #606060 84%, #3A3A3A 100%);
+  box-shadow: inset -1px -1px 3px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.7);
+  margin-right: 16px;
+  vertical-align: middle;
+  position: relative;
+  top: -8px;
+  flex-shrink: 0;
+}
+
+.flipper-word {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(96px, 18vw, 160px);
+  line-height: 0.88;
+  letter-spacing: -0.015em;
+  color: var(--cream);
+  display: block;
+}
+
+.berlin-word {
+  font-family: var(--font-mono);
+  font-size: clamp(11px, 2vw, 16px);
+  letter-spacing: 0.5em;
+  color: var(--amber);
+  text-transform: uppercase;
+  display: block;
+  margin-top: 14px;
+  margin-left: 38px;
+  animation: fadeUp 0.9s 0.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ── CONTACT ── */
+.contact {
+  margin-top: 64px;
+  text-align: center;
+  animation: fadeUp 0.9s 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.contact-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--gray-light);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.contact-link {
+  font-family: var(--font-mono);
+  font-size: clamp(13px, 2.5vw, 16px);
+  color: var(--cream-dim);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--gray-mid);
+  padding-bottom: 2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.contact-link:hover {
+  color: var(--amber);
+  border-color: var(--amber-dim);
+}
+
+/* ── FOOTER ── */
+footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--gray-border);
+  padding: 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  animation: fadeUp 0.9s 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.footer-dolphin {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0.3;
+}
+
+.footer-dolphin svg {
+  width: 32px;
+  height: auto;
+}
+
+.footer-dolphin span {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--gray-light);
+  letter-spacing: 0.12em;
+}
+
+.footer-nav {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: var(--gray-light);
+}
+
+.footer-nav a {
+  color: var(--gray-light);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-nav a:hover {
+  color: var(--amber);
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 480px) {
+  .mark {
+    width: 17px;
+    height: 17px;
+    margin-right: 10px;
+    top: -5px;
+  }
+  footer {
+    padding: 20px 24px;
+  }
+  .footer-dolphin span {
+    display: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<main>
+  <div class="logo">
+    <span class="flipper-word"><span class="mark"></span>FLIPPER</span>
+    <span class="berlin-word">BERLIN</span>
+  </div>
+
+  <div class="contact">
+    <p class="contact-label">Kontakt · Contact</p>
+    <a class="contact-link" href="mailto:hello@flipperberlin.de">hello@flipperberlin.de</a>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-dolphin">
+    <svg viewBox="0 0 200 95" xmlns="http://www.w3.org/2000/svg">
+      <path d="M185,52 C175,38 158,28 138,23 L126,3 L113,24 C94,28 72,33 48,40 C33,43 20,43 8,28 L5,20 L17,47 L6,68 C24,65 38,65 52,68 C72,72 102,76 122,74 C142,72 160,64 172,56 C179,52 183,52 185,52 Z" fill="#F2A020"/>
+      <path d="M112,72 C106,80 97,85 101,87 C108,82 116,76 112,72 Z" fill="#F2A020"/>
+      <circle cx="168" cy="38" r="2.8" fill="#0D0B07"/>
+      <path d="M183,53 C180,57 174,58 168,57" fill="none" stroke="#0D0B07" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <span>auch ein Delfin</span>
+  </div>
+
+  <nav class="footer-nav">
+    <a href="impressum.html">Impressum</a>
+  </nav>
+</footer>
+
+</body>
+</html>
