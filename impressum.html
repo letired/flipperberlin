@@ -67,19 +67,22 @@ header {
   line-height: 0.9;
   letter-spacing: -0.01em;
   color: var(--cream);
+  display: inline-block;
+  position: relative;
+  align-self: flex-start;
 }
 
 .mark {
-  display: inline-block;
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
   width: 10px;
   height: 10px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 32%, #FFFFFF 0%, #D8D8D8 28%, #A0A0A0 58%, #606060 84%, #3A3A3A 100%);
   box-shadow: inset -1px -1px 2px rgba(0,0,0,0.5), inset 1px 1px 1px rgba(255,255,255,0.35), 0 1px 4px rgba(0,0,0,0.7);
   margin-right: 8px;
-  vertical-align: middle;
-  position: relative;
-  top: -3px;
 }
 
 .berlin-word {
@@ -89,7 +92,6 @@ header {
   color: var(--amber);
   text-transform: uppercase;
   margin-top: 5px;
-  margin-left: 18px;
 }
 
 .back-link {
@@ -210,21 +212,6 @@ footer {
   z-index: 1;
 }
 
-.footer-dolphin {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  opacity: 0.3;
-}
-
-.footer-dolphin svg { width: 28px; height: auto; }
-.footer-dolphin span {
-  font-family: var(--font-mono);
-  font-size: 9px;
-  color: var(--gray-light);
-  letter-spacing: 0.12em;
-}
-
 .footer-copy {
   font-family: var(--font-mono);
   font-size: 10px;
@@ -237,7 +224,6 @@ footer {
   main { padding: 48px 24px 60px; }
   h1 { font-size: 54px; margin-bottom: 40px; }
   footer { padding: 20px 24px; }
-  .footer-dolphin span { display: none; }
 }
 </style>
 </head>
@@ -258,9 +244,9 @@ footer {
   <div class="impressum-section">
     <div class="section-title">Angaben gemäß § 5 TMG</div>
     <address>
-      <span class="placeholder">Flipper Berlin</span><br>
-      <span class="placeholder">Courbierestr. 13</span><br>
-      <span class="placeholder">10787 Berlin</span>
+      Flipper Berlin<br>
+      Courbierestr. 13<br>
+      10787 Berlin
     </address>
   </div>
 
@@ -273,15 +259,6 @@ footer {
 </main>
 
 <footer>
-  <div class="footer-dolphin">
-    <svg viewBox="0 0 200 95" xmlns="http://www.w3.org/2000/svg">
-      <path d="M185,52 C175,38 158,28 138,23 L126,3 L113,24 C94,28 72,33 48,40 C33,43 20,43 8,28 L5,20 L17,47 L6,68 C24,65 38,65 52,68 C72,72 102,76 122,74 C142,72 160,64 172,56 C179,52 183,52 185,52 Z" fill="#F2A020"/>
-      <path d="M112,72 C106,80 97,85 101,87 C108,82 116,76 112,72 Z" fill="#F2A020"/>
-      <circle cx="168" cy="38" r="2.8" fill="#0D0B07"/>
-      <path d="M183,53 C180,57 174,58 168,57" fill="none" stroke="#0D0B07" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-    <span>auch ein Delfin</span>
-  </div>
   <div class="footer-copy">flipperberlin.de</div>
 </footer>
 
