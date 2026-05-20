@@ -43,25 +43,44 @@ body {
 body::before {
   content: '';
   position: fixed;
-  inset: 0;
+  inset: -30%;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
-  opacity: 0.025;
+  opacity: 0.06;
   pointer-events: none;
   z-index: 100;
+  animation: grain 0.65s steps(1, end) infinite;
+  will-change: transform;
 }
 
-/* ── AMBIENT GLOW ── */
+@keyframes grain {
+  0%    { transform: translate(  0%,   0%); }
+  12.5% { transform: translate( -4%,  -8%); }
+  25%   { transform: translate(-12%,   3%); }
+  37.5% { transform: translate(  6%, -14%); }
+  50%   { transform: translate( -3%,  11%); }
+  62.5% { transform: translate(-10%,   6%); }
+  75%   { transform: translate( 12%,  -7%); }
+  87.5% { transform: translate( -6%,   4%); }
+  100%  { transform: translate(  0%,   0%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+}
+
+/* ── AMBIENT GLOW (cursor-tracked) ── */
 body::after {
   content: '';
   position: fixed;
-  top: -20%;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 800px;
-  height: 500px;
-  background: radial-gradient(ellipse at center, rgba(242,160,32,0.07) 0%, transparent 70%);
+  top: var(--glow-y, 20%);
+  left: var(--glow-x, 50%);
+  transform: translate(-50%, -50%);
+  width: 900px;
+  height: 600px;
+  background: radial-gradient(ellipse at center, rgba(242,160,32,0.08) 0%, transparent 70%);
   pointer-events: none;
   z-index: 0;
+  will-change: top, left;
 }
 
 /* ── MAIN ── */
@@ -88,12 +107,14 @@ main {
   right: 100%;
   top: 50%;
   transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 32%, #FFFFFF 0%, #D8D8D8 28%, #A0A0A0 58%, #606060 84%, #3A3A3A 100%);
-  box-shadow: inset -1px -1px 3px rgba(0,0,0,0.5), inset 1px 1px 2px rgba(255,255,255,0.35), 0 2px 8px rgba(0,0,0,0.7);
+  background: radial-gradient(circle at 35% 32%, #D4D4D4 0%, #ABABAB 30%, #7A7A7A 60%, #444444 85%, #232323 100%);
+  box-shadow: inset -2px -2px 5px rgba(0,0,0,0.55), inset 2px 2px 3px rgba(255,255,255,0.22), 0 3px 12px rgba(0,0,0,0.75);
   margin-right: 16px;
+  cursor: pointer;
+  user-select: none;
 }
 
 .flipper-word {
@@ -142,7 +163,10 @@ main {
   letter-spacing: 0.05em;
   border-bottom: 1px solid var(--gray-mid);
   padding-bottom: 2px;
-  transition: color 0.2s, border-color 0.2s;
+  display: inline-block;
+  transition: color 0.2s, border-color 0.2s,
+              transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .contact-link:hover {
@@ -172,7 +196,9 @@ footer {
 .footer-nav a {
   color: var(--gray-light);
   text-decoration: none;
-  transition: color 0.2s;
+  display: inline-block;
+  transition: color 0.2s, transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .footer-nav a:hover {
@@ -194,12 +220,16 @@ footer {
 /* ── MOBILE ── */
 @media (max-width: 480px) {
   .mark {
-    width: 17px;
-    height: 17px;
+    width: 34px;
+    height: 34px;
     margin-right: 10px;
   }
   footer {
     padding: 20px 24px;
+  }
+  body::after {
+    top: 50%;
+    left: 50%;
   }
 }
 </style>
@@ -223,6 +253,216 @@ footer {
     <a href="impressum.html">Impressum</a>
   </nav>
 </footer>
+
+<script>
+(() => {
+  const fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  if (!fine) return;
+
+  const root = document.documentElement;
+  let mx = window.innerWidth / 2, my = window.innerHeight * 0.2;
+  let gx = mx, gy = my;
+  let pointerX = mx, pointerY = my;
+
+  window.addEventListener('mousemove', (e) => {
+    mx = e.clientX;
+    my = e.clientY;
+    pointerX = e.clientX;
+    pointerY = e.clientY;
+  }, { passive: true });
+
+  const magnets = [...document.querySelectorAll('.contact-link, .footer-nav a')];
+
+  function frame() {
+    // Parallax glow — eased follow
+    gx += (mx - gx) * 0.06;
+    gy += (my - gy) * 0.06;
+    root.style.setProperty('--glow-x', gx + 'px');
+    root.style.setProperty('--glow-y', gy + 'px');
+
+    // Magnetic links — pull toward cursor when nearby
+    const radius = 110;
+    magnets.forEach(el => {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const dx = pointerX - cx;
+      const dy = pointerY - cy;
+      const dist = Math.hypot(dx, dy);
+      if (dist < radius) {
+        const strength = (1 - dist / radius) * 0.4;
+        el.style.transform = `translate(${dx * strength}px, ${dy * strength}px)`;
+      } else {
+        el.style.transform = '';
+      }
+    });
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+<script>
+// Pinball easter egg — click the silver ball to launch it
+(() => {
+  const mark = document.querySelector('.mark');
+  const flipper = document.querySelector('.flipper-word');
+  if (!mark) return;
+
+  // Create a stand-in ball that flies around, so the original .mark
+  // stays in its CSS-positioned slot and we sidestep any inline-style
+  // / !important / transform conflicts.
+  const ball = document.createElement('div');
+  ball.setAttribute('aria-hidden', 'true');
+  Object.assign(ball.style, {
+    position: 'fixed',
+    width: '44px',
+    height: '44px',
+    borderRadius: '50%',
+    background: 'radial-gradient(circle at 35% 32%, #D4D4D4 0%, #ABABAB 30%, #7A7A7A 60%, #444444 85%, #232323 100%)',
+    boxShadow: 'inset -2px -2px 5px rgba(0,0,0,0.55), inset 2px 2px 3px rgba(255,255,255,0.22), 0 3px 12px rgba(0,0,0,0.75)',
+    pointerEvents: 'none',
+    zIndex: '9999',
+    left: '-9999px',
+    top: '-9999px',
+    willChange: 'transform, left, top',
+  });
+  document.body.appendChild(ball);
+
+  const G = 2100;
+  const REST = 0.75;
+  const AIR = 0.999;
+  const REST_SPEED = 35;
+  const MAX_LIFE_MS = 15000;
+
+  let launched = false;
+  let x, y, vx, vy, size;
+  let raf, lastT, startT;
+  let obstacles = [];
+
+  function snapshotObstacles() {
+    obstacles = [];
+    const sels = '.flipper-word, .berlin-word, .contact-label, .contact-link, .footer-nav a';
+    document.querySelectorAll(sels).forEach(el => {
+      const r = el.getBoundingClientRect();
+      if (r.width <= 0 || r.height <= 0) return;
+      obstacles.push({ left: r.left, right: r.right, top: r.top, bottom: r.bottom });
+    });
+  }
+
+  function show() { mark.style.visibility = ''; }
+  function hide() { mark.style.visibility = 'hidden'; }
+
+  function placeBall() {
+    ball.style.left = x + 'px';
+    ball.style.top = y + 'px';
+  }
+
+  function launch() {
+    const r = mark.getBoundingClientRect();
+    size = r.width;
+    x = r.left;
+    y = r.top;
+    placeBall();
+    hide();
+
+    vx = (Math.random() < 0.5 ? -1 : 1) * (250 + Math.random() * 350);
+    vy = -1300;
+
+    snapshotObstacles();
+    launched = true;
+    lastT = performance.now();
+    startT = lastT;
+    raf = requestAnimationFrame(step);
+  }
+
+  function reset() {
+    cancelAnimationFrame(raf);
+    launched = false;
+    ball.style.left = '-9999px';
+    ball.style.top = '-9999px';
+    show();
+  }
+
+  function step(now) {
+    const dt = Math.min(0.032, (now - lastT) / 1000);
+    lastT = now;
+
+    vy += G * dt;
+    vx *= AIR;
+    x += vx * dt;
+    y += vy * dt;
+
+    const W = window.innerWidth, H = window.innerHeight;
+    const rad = size / 2;
+
+    if (x < 0) { x = 0; if (vx < 0) vx = -vx * REST; }
+    if (x + size > W) { x = W - size; if (vx > 0) vx = -vx * REST; }
+    if (y + size > H) { y = H - size; if (vy > 0) vy = -vy * REST; }
+    if (y < 0) { y = 0; if (vy < 0) vy = -vy * REST; }
+
+    const cx = x + rad, cy = y + rad;
+    for (const o of obstacles) {
+      const px = Math.max(o.left, Math.min(cx, o.right));
+      const py = Math.max(o.top, Math.min(cy, o.bottom));
+      const dx = cx - px, dy = cy - py;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < rad * rad) {
+        let nx, ny, d;
+        if (d2 < 0.0001) {
+          const lo = cx - o.left, ro = o.right - cx;
+          const to = cy - o.top,  bo = o.bottom - cy;
+          const m = Math.min(lo, ro, to, bo);
+          if      (m === lo) { nx = -1; ny =  0; }
+          else if (m === ro) { nx =  1; ny =  0; }
+          else if (m === to) { nx =  0; ny = -1; }
+          else               { nx =  0; ny =  1; }
+          d = 0;
+        } else {
+          d = Math.sqrt(d2);
+          nx = dx / d; ny = dy / d;
+        }
+        x += nx * (rad - d);
+        y += ny * (rad - d);
+        const vdotn = vx * nx + vy * ny;
+        if (vdotn < 0) {
+          vx -= (1 + REST) * vdotn * nx;
+          vy -= (1 + REST) * vdotn * ny;
+        }
+      }
+    }
+
+    placeBall();
+
+    const speed = Math.hypot(vx, vy);
+    const onFloor = y + size >= H - 1;
+    if (speed < REST_SPEED && onFloor) {
+      setTimeout(reset, 450);
+      return;
+    }
+    if (now - startT > MAX_LIFE_MS) {
+      reset();
+      return;
+    }
+
+    raf = requestAnimationFrame(step);
+  }
+
+  function handleClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (launched) {
+      vy = -1300;
+      vx += (Math.random() - 0.5) * 500;
+    } else {
+      launch();
+    }
+  }
+
+  mark.addEventListener('click', handleClick);
+})();
+</script>
 
 </body>
 </html>
